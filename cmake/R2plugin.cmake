@@ -27,12 +27,12 @@ include(CheckCCompilerFlag)
 include(CheckCXXCompilerFlag)
 include(CheckLinkerFlag)
 
-macro(check_compiler_flags CHECK_FUNC FLAGS OUTPUT)
+macro(check_compiler_flags LANG FLAGS OUTPUT)
     foreach(flag ${${FLAGS}})
         string(REPLACE "+" "P" VAR_NAME ${flag})
         string(TOUPPER ${VAR_NAME} VAR_NAME)
         set(flag "-${flag}")
-        cmake_language(CALL ${CHECK_FUNC} "${flag}" "${VAR_NAME}")
+        check_compiler_flag("${LANG}" "${flag}" "${VAR_NAME}")
 
         if(${${VAR_NAME}})
             list(APPEND ${OUTPUT} "${flag}")
@@ -79,7 +79,7 @@ list(APPEND
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 
 if("C" IN_LIST languages)
-    check_compiler_flags(check_c_compiler_flag C_FLAGS C_FLAGS_LIST)
+    check_compiler_flags("C" C_FLAGS C_FLAGS_LIST)
     list(JOIN C_FLAGS_LIST " " C_FLAGS)
     set(PLUGIN_C_FLAGS "${PLUGIN_C_FLAGS} ${C_FLAGS}")
 
@@ -87,11 +87,11 @@ if("C" IN_LIST languages)
     list(JOIN C_LINK_FLAGS_LIST " " PLUGIN_C_LINK_FLAGS)
 endif()
 if("CXX" IN_LIST languages)
-    check_compiler_flags(check_cxx_compiler_flag CXX_FLAGS CXX_FLAGS_LIST)
+    check_compiler_flags("CXX" CXX_FLAGS CXX_FLAGS_LIST)
     list(JOIN CXX_FLAGS_LIST " " CXX_FLAGS)
     set(PLUGIN_CXX_FLAGS "${PLUGIN_CXX_FLAGS} ${CXX_FLAGS}")
 
-    check_linker_flags("C" CXX_LINK_FLAGS CXX_LINK_FLAGS_LIST)
+    check_linker_flags("CXX" CXX_LINK_FLAGS CXX_LINK_FLAGS_LIST)
     list(JOIN CXX_LINK_FLAGS_LIST " " PLUGIN_CXX_LINK_FLAGS)
 endif()
 

@@ -3,8 +3,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 find_package(spdlog REQUIRED)
 
-plugin_manifest(SouthRPC name "South-RPC")
-plugin_manifest(SouthRPC displayname "South RPC")
+plugin_manifest(SouthRPC name "SouthRPC")
+plugin_manifest(SouthRPC displayname "SouthRPC")
 plugin_manifest(SouthRPC description "Implements JSON-RPC Bridge for Northstar over TCP/IP")
 plugin_manifest(SouthRPC run_on_server OFF)
 plugin_manifest(SouthRPC run_on_client ON)

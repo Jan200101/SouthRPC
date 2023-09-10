@@ -2,6 +2,7 @@
 #define LOGGING_H
 
 #include <iostream>
+#include <chrono>
 
 #include "plugin.h"
 #include "spdlog/sinks/base_sink.h"
