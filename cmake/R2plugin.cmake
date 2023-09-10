@@ -9,8 +9,6 @@ cmake_policy(SET CMP0057 NEW)
 
 project(R2plugin)
 
-find_package(spdlog REQUIRED)
-find_package(NorthstarPluginABI REQUIRED)
 
 if (NOT WIN32)
     message(FATAL_ERROR "Northstar Plugins can only be compiled for Windows")
@@ -22,6 +20,9 @@ if (__R2PLUGIN_CMAKE_INCLUDED)
     return()
 endif()
 set(__R2PLUGIN_CMAKE_INCLUDED TRUE)
+
+find_package(spdlog REQUIRED)
+find_package(NorthstarPluginABI REQUIRED)
 
 include(CheckCCompilerFlag)
 include(CheckCXXCompilerFlag)

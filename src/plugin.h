@@ -1,14 +1,32 @@
 #ifndef PLUGIN_H
 #define PLUGIN_H
 
-// Needed to bootstrap plugin abi
-#include <windef.h>
-#include <mutex>
-#include <optional>
-#include <map>
-#include <unordered_map>
-#include "spdlog/spdlog.h"
+#include "ns_plugin.h"
 
-#include "plugin_abi.h"
+class jsonrpc_server;
+
+struct EngineData
+{
+    ConCommandConstructorType ConCommandConstructor;
+    ConVarMallocType conVarMalloc;
+    ConVarRegisterType conVarRegister;
+    void* ConVar_Vtable;
+    void* IConVar_Vtable;
+};
+
+class Plugin {
+    private:
+        PluginInitFuncs* funcs = nullptr;
+        PluginNorthstarData* data = nullptr;
+        EngineData* engine_data = nullptr;
+
+        jsonrpc_server* server;
+
+    public:
+        Plugin(PluginInitFuncs* funcs, PluginNorthstarData* data);
+        ~Plugin();
+
+        void LoadEngineData(void* data);
+};
 
 #endif
