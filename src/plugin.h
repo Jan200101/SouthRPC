@@ -27,6 +27,7 @@ class Plugin {
         ~Plugin();
 
         void LoadEngineData(void* data);
+        void RegisterConCommand(const char* name, FnCommandCallback_t callback, const char* helpString, int flags);
 };
 
 #endif

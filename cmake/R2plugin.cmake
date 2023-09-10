@@ -9,11 +9,12 @@ cmake_policy(SET CMP0057 NEW)
 
 project(R2plugin)
 
-
 if (NOT WIN32)
     message(FATAL_ERROR "Northstar Plugins can only be compiled for Windows")
-elseif (NOT "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "x86_64")
+elseif ("${CMAKE_SYSTEM_PROCESSOR}" AND NOT "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "x86_64")
     message(FATAL_ERROR "Northstar Plugins can only be build for x86_64")
+elseif (NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC")
+    message(WARNING "Titanfall and Northstar are built using MSVC, other compilers may not work.")
 endif ()
 
 if (__R2PLUGIN_CMAKE_INCLUDED)
