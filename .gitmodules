@@ -1,0 +1,4 @@
+[submodule "deps/NorthstarLauncher"]
+	path = deps/NorthstarLauncher
+	url = https://github.com/R2Northstar/NorthstarLauncher
+	branch = 300521638f6600f23bfea433e8069c049af42388
