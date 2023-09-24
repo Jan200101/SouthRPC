@@ -5,8 +5,8 @@ find_package(RapidJSON REQUIRED)
 
 plugin_manifest(SouthRPC name "SouthRPC")
 plugin_manifest(SouthRPC displayname "SouthRPC")
-plugin_manifest(SouthRPC description "Implements JSON-RPC Bridge for Northstar over TCP/IP")
-plugin_manifest(SouthRPC run_on_server OFF)
+plugin_manifest(SouthRPC description "Implements JSON-RPC 2.0 Bridge for Northstar over HTTP 1.1")
+plugin_manifest(SouthRPC run_on_server ON) # Insecure but sure
 plugin_manifest(SouthRPC run_on_client ON)
 
 add_library(SouthRPC SHARED
@@ -23,3 +23,8 @@ target_link_libraries(SouthRPC ws2_32)
 target_precompile_headers(SouthRPC PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ns_plugin.h)
 
 plugin_link(SouthRPC)
+plugin_thunderstore(SouthRPC
+	"https://github.com/Jan200101/SouthRPC"
+	"${PROJECT_SOURCE_DIR}/README.md"
+	"${PROJECT_SOURCE_DIR}/icon.png"
+)

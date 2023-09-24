@@ -14,7 +14,7 @@ if (NOT WIN32)
 elseif ("${CMAKE_SYSTEM_PROCESSOR}" AND NOT "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "x86_64")
     message(FATAL_ERROR "Northstar Plugins can only be build for x86_64")
 elseif (NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC")
-    message(WARNING "Titanfall and Northstar are built using MSVC, other compilers may not work.")
+    message(WARNING "Titanfall and Northstar are built using MSVC, other compilers may not produce a working plugin.")
 endif ()
 
 if (__R2PLUGIN_CMAKE_INCLUDED)
@@ -129,26 +129,18 @@ BEGIN
 END
 ")
 
-set(MANIFEST_TEMPLATE
-    "{
+set(MANIFEST_TEMPLATE "
+    {
+        \"name\": \"NSPlugin\",
+        \"displayname\": \"Northstar Plugin\",
         \"description\": \"\",
         \"api_version\": \"2\",
         \"version\": \"0\",
         \"run_on_server\": false,
         \"run_on_client\": false
-    }"
+    }\n"
 )
 
-list(APPEND
-    REQUIRED_MANIFEST_KEYS
-    name
-    displayname
-    description
-    api_version
-    version
-    run_on_server
-    run_on_client
-)
 macro(plugin_manifest TARGET KEY VALUE)
     if (NOT ${TARGET}_MANIFEST)
         set(${TARGET}_MANIFEST "${MANIFEST_TEMPLATE}")
@@ -172,6 +164,10 @@ macro(plugin_manifest TARGET KEY VALUE)
 endmacro()
 
 macro(plugin_link TARGET)
+    if (NOT ${TARGET}_MANIFEST)
+        message(FATAL_ERROR "No Plugin manifest found")
+    endif()
+
     if("C" IN_LIST languages)
         target_link_libraries(${TARGET} ${PLUGIN_C_LINK_FLAGS})
     endif()
@@ -190,4 +186,39 @@ macro(plugin_link TARGET)
     file(WRITE "${MANIFEST_DIR}/manifest.json" "${${TARGET}_MANIFEST}")
     file(WRITE "${MANIFEST_DIR}/manifest.rc" "${RESOURCE_TEMPLATE}")
     target_sources(${TARGET} PUBLIC "${MANIFEST_DIR}/manifest.rc")
+endmacro()
+
+macro(plugin_thunderstore TARGET WEBSITE_URL README ICON)
+    if (NOT ${TARGET}_MANIFEST)
+        message(FATAL_ERROR "No Plugin manifest found")
+    endif()
+
+    string(JSON PLUGIN_NAME GET "${${TARGET}_MANIFEST}" name)
+    string(JSON PLUGIN_DESCRIPTION GET "${${TARGET}_MANIFEST}" description)
+    string(JSON PLUGIN_VERSION GET "${${TARGET}_MANIFEST}" version)
+
+    set(THUNDERSTORE_TEMPLATE "
+        {
+            \"name\": \"kyurid\",
+            \"version_number\": \"\",
+            \"website_url\": \"${WEBSITE_URL}\",
+            \"description\": \"\",
+            \"dependencies\": []
+        }\n"
+    )
+    # do this to reformat the template
+    string(JSON THUNDERSTORE_TEMPLATE SET "${THUNDERSTORE_TEMPLATE}" name "\"${PLUGIN_NAME}\"")
+    string(JSON THUNDERSTORE_TEMPLATE SET "${THUNDERSTORE_TEMPLATE}" version_number "\"${PLUGIN_VERSION}\"")
+    string(JSON THUNDERSTORE_TEMPLATE SET "${THUNDERSTORE_TEMPLATE}" description "\"${PLUGIN_DESCRIPTION}\"")
+
+    set(MOD_DIR "${CMAKE_BINARY_DIR}/${TARGET}_mod/")
+    set(MOD_PLUG_DIR "${MOD_DIR}/plugins")
+
+    file(MAKE_DIRECTORY "${MOD_DIR}")
+    file(MAKE_DIRECTORY "${MOD_PLUG_DIR}")
+    file(WRITE "${MOD_DIR}/manifest.json" "${THUNDERSTORE_TEMPLATE}")
+    file(COPY_FILE ${README} "${MOD_DIR}/README.md")
+    file(COPY_FILE ${ICON} "${MOD_DIR}/icon.png")
+
+    install(TARGETS ${TARGET} RUNTIME DESTINATION "${MOD_PLUG_DIR}")
 endmacro()

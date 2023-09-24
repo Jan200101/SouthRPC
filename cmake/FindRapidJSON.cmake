@@ -1,4 +1,4 @@
-### Get same spdlog as Northstar
+### Get same RapidJSON as Northstar
 
 if (RapidJSON_FOUND)
 	return()
