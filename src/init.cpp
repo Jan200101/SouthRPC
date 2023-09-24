@@ -10,7 +10,7 @@ extern "C" __declspec(dllexport)
 void PLUGIN_INIT(PluginInitFuncs* funcs, PluginNorthstarData* data)
 {
     spdlog::default_logger()->sinks().pop_back();
-    spdlog::default_logger()->sinks().push_back(std::make_shared<PluginSink>(funcs->logger));
+    spdlog::default_logger()->sinks().push_back(std::make_shared<PluginSink>(funcs->logger, data->pluginHandle));
 
     plugin = new Plugin(funcs, data);
 }
@@ -18,26 +18,56 @@ void PLUGIN_INIT(PluginInitFuncs* funcs, PluginNorthstarData* data)
 extern "C" __declspec(dllexport)
 void PLUGIN_DEINIT()
 {
-    if (plugin)
-    {
-        delete plugin;
-        plugin = nullptr;
-    }
+    assert(plugin);
+
+    delete plugin;
+    plugin = nullptr;
 }
 
 extern "C" __declspec(dllexport)
 void PLUGIN_INFORM_DLL_LOAD(PluginLoadDLL dll, void* data) {
+    assert(plugin);
+
     switch (dll) {
         case PluginLoadDLL::ENGINE:
             plugin->LoadEngineData(data);
-            break;
+            plugin->StartServer();
         case PluginLoadDLL::CLIENT:
+            break;
         case PluginLoadDLL::SERVER:
             break;
         default:
             spdlog::warn("PLUGIN_INFORM_DLL_LOAD called with unknown type {}", (int)dll);
             break;
     }
+}
+
+extern "C" __declspec(dllexport)
+void PLUGIN_INIT_SQVM_CLIENT(SquirrelFunctions* funcs)
+{
+    assert(plugin);
+    plugin->LoadSQVMFunctions(ScriptContext::CLIENT, funcs);
+}
+
+extern "C" __declspec(dllexport)
+void PLUGIN_INIT_SQVM_SERVER(SquirrelFunctions* funcs)
+{
+    assert(plugin);
+    plugin->LoadSQVMFunctions(ScriptContext::SERVER, funcs);
+}
+
+extern "C" __declspec(dllexport)
+void PLUGIN_INFORM_SQVM_CREATED(ScriptContext context, CSquirrelVM* sqvm)
+{
+    assert(plugin);
+    plugin->LoadSQVM(context, sqvm);
+}
+
+extern "C" __declspec(dllexport)
+void PLUGIN_INFORM_SQVM_DESTROYED(ScriptContext context)
+{
+    assert(plugin);
+    plugin->RemoveSQVM(context);
 }
 
 // There is no deinit logic for Plugins

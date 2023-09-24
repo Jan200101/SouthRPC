@@ -1,7 +1,7 @@
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-find_package(json-c REQUIRED)
+find_package(RapidJSON REQUIRED)
 
 plugin_manifest(SouthRPC name "SouthRPC")
 plugin_manifest(SouthRPC displayname "SouthRPC")
@@ -17,7 +17,9 @@ add_library(SouthRPC SHARED
 	${CMAKE_CURRENT_SOURCE_DIR}/server.h
 )
 
-target_link_libraries(SouthRPC json-c::json-c)
+target_include_directories(SouthRPC PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(SouthRPC rapidjson_header)
+target_link_libraries(SouthRPC ws2_32)
 target_precompile_headers(SouthRPC PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ns_plugin.h)
 
 plugin_link(SouthRPC)
