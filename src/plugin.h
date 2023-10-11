@@ -6,6 +6,7 @@
 #include "ns_plugin.h"
 #include "internal/concommandproxy.h"
 #include "internal/convarproxy.h"
+#include "internal/sqfuncregistrationproxy.h"
 
 class rpc_server;
 
@@ -34,6 +35,8 @@ class Plugin {
         std::vector<ConCommandProxy*> commands;
         std::vector<ConVarProxy*> variables;
 
+        std::vector<SQFuncRegistrationProxy*> squirrel_functions;
+
         HMODULE GetModuleByName(const char* name);
 
     public:
@@ -48,6 +51,7 @@ class Plugin {
         void StartServer();
         void RunCommand(const char* cmd);
         SQRESULT RunSquirrelCode(ScriptContext context, std::string code, SQObject* ret_val);
+        SQFuncRegistrationProxy* AddNativeSquirrelFunction(std::string returnType, std::string name, std::string argTypes, std::string helpText, ScriptContext context, SQFunction func);
 
         // Wraps around the internals we receive
         ConCommandProxy* ConCommand(const char* name, FnCommandCallback_t callback, const char* helpString, int flags, void* parent = nullptr);

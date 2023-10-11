@@ -9,6 +9,7 @@
 #include "internal/types.h"
 #include "internal/concommandproxy.h"
 #include "internal/convarproxy.h"
+#include "internal/sqfuncregistrationproxy.h"
 
 Plugin::Plugin(PluginInitFuncs* funcs, PluginNorthstarData* data)
 {
@@ -114,24 +115,38 @@ void Plugin::LoadSQVMFunctions(ScriptContext context, SquirrelFunctions* funcs)
 
 void Plugin::LoadSQVM(ScriptContext context, CSquirrelVM* sqvm)
 {
+    SquirrelFunctions* funcs = nullptr;
     switch (context)
     {
         case ScriptContext::CLIENT:
             this->client_vm = *sqvm;
+            funcs = &this->client_sqvm_funcs;
             break;
 
         case ScriptContext::SERVER:
             this->server_vm = *sqvm;
+            funcs = &this->server_sqvm_funcs;
             break;
 
         case ScriptContext::UI:
             this->ui_vm = *sqvm;
+            funcs = &this->client_sqvm_funcs;
             break;
 
         case ScriptContext::INVALID:
         default:
             spdlog::warn("Received invalid script context");
-            break;
+            return;
+    }
+
+    for (SQFuncRegistrationProxy* proxy : this->squirrel_functions)
+    {
+        if (proxy->getContext() == context)
+        {
+            SQFuncRegistration* reg = proxy->get();
+            spdlog::info("Registering Squirrel Function {}", proxy->getName());
+            funcs->RegisterSquirrelFunc(sqvm, reg, 1);
+        }
     }
 }
 
@@ -228,6 +243,15 @@ SQRESULT Plugin::RunSquirrelCode(ScriptContext context, std::string code, SQObje
         return SQRESULT_NULL;
 
     return SQRESULT_NOTNULL;
+}
+
+SQFuncRegistrationProxy* Plugin::AddNativeSquirrelFunction(std::string returnType, std::string name, std::string argTypes, std::string helpText, ScriptContext context, SQFunction func)
+{
+    SQFuncRegistrationProxy* sqfrp = new SQFuncRegistrationProxy(returnType, name, argTypes, helpText, context, func);
+
+    sqfrp->initialize(nullptr);
+
+    return this->squirrel_functions.emplace_back(sqfrp);
 }
 
 ConCommandProxy* Plugin::ConCommand(const char* name, FnCommandCallback_t callback, const char* helpString, int flags, void* parent)

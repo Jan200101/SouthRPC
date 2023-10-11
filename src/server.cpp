@@ -17,12 +17,20 @@ void ConCommand_southrpc_status(const CCommand& args)
     spdlog::info("Yes");
 }
 
+SQRESULT Script_test(HSquirrelVM* sqvm)
+{
+    spdlog::info("Script_test invoked");
+    return SQRESULT_NOTNULL;
+}
+
 rpc_server::rpc_server(Plugin* plugin)
     : parent(plugin)
 {
     plugin->ConCommand("southrpc_status", ConCommand_southrpc_status, "", 0);
 
     this->Convar_Port = plugin->ConVar("southrpc_port", DEFAULT_PORT, FCVAR_ARCHIVE, "South RPC HTTP Port (requires restart, default: " DEFAULT_PORT ")");
+
+    plugin->AddNativeSquirrelFunction("void", "south_test", "", "", ScriptContext::UI, Script_test);
 
     if (WSAStartup(MAKEWORD(2, 2), &this->wsaData) != 0) {
         spdlog::error("Failed to open Windows Socket");
