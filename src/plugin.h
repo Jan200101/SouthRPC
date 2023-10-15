@@ -8,7 +8,7 @@
 #include "internal/convarproxy.h"
 #include "internal/sqfuncregistrationproxy.h"
 
-class rpc_server;
+class ServerHandler;
 
 class Plugin {
     private:
@@ -30,16 +30,18 @@ class Plugin {
             Cbuf_ExecuteType Cbuf_Execute;
         } engine_funcs = { 0 };
 
-        rpc_server* server = nullptr;
 
         std::vector<ConCommandProxy*> commands;
         std::vector<ConVarProxy*> variables;
 
         std::vector<SQFuncRegistrationProxy*> squirrel_functions;
 
+        void register_server_callbacks();
         HMODULE GetModuleByName(const char* name);
 
     public:
+        ServerHandler* server = nullptr;
+
         Plugin(PluginInitFuncs* funcs, PluginNorthstarData* data);
         ~Plugin();
 

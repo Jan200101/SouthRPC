@@ -1,7 +1,6 @@
 #include "ns_plugin.h"
 #include "internal/logging.h"
 
-#include "server.h"
 #include "plugin.h"
 
 Plugin* plugin = nullptr;

@@ -3,9 +3,12 @@
 #include <stdio.h>
 #include <psapi.h>
 
+#include <rapidjson/document.h>
+
 #include "ns_plugin.h"
 #include "plugin.h"
-#include "server.h"
+#include "handler.h"
+#include "helper.h"
 #include "internal/types.h"
 #include "internal/concommandproxy.h"
 #include "internal/convarproxy.h"
@@ -13,10 +16,13 @@
 
 Plugin::Plugin(PluginInitFuncs* funcs, PluginNorthstarData* data)
 {
-    this->funcs = *funcs;
-    this->data = *data;
+    if (funcs)
+        this->funcs = *funcs;
+    if (data)
+        this->data = *data;
 
-    this->server = new rpc_server(this);
+    this->server = new ServerHandler(this);
+    this->register_server_callbacks();
 
     spdlog::info(PLUGIN_NAME " initialised!");
 }
@@ -37,6 +43,94 @@ Plugin::~Plugin()
 
     server->stop();
     delete server;
+}
+
+void Plugin::register_server_callbacks()
+{
+    /* execute_squirrel */
+    this->server->register_callback(
+        "execute_squirrel",
+        [this](rapidjson::MemoryPoolAllocator<>& allocator, rapidjson::Value& params) -> rapidjson::Value
+        {
+            if (!params.IsObject())
+            {
+                return rapidjson::Value("method 'execute_command' only supports object parameters");
+            }
+
+            const char* code = params["code"].GetString();
+            ScriptContext context = ScriptContext::UI;
+
+            if (params.HasMember("context"))
+            {
+                if (params["context"] == "client")
+                {
+                    context = ScriptContext::CLIENT;
+                }
+                else if (params["context"] == "server")
+                {
+                    context = ScriptContext::SERVER;
+                }
+                else if (params["context"] == "ui")
+                {
+                    context = ScriptContext::UI;
+                }
+                else
+                {
+                   return rapidjson::Value("method 'execute_command' received invalid value for parameter 'context'");
+                }
+            }
+
+            SQObject obj_ptr;
+            this->RunSquirrelCode(context, code, &obj_ptr);
+
+            rapidjson::Value result;
+            SquirrelToJSON(&result, allocator, &obj_ptr);
+            return result;
+        }
+    );
+
+    /* execute_squirrel */
+    this->server->register_callback(
+        "execute_command",
+        [this](rapidjson::MemoryPoolAllocator<>& allocator, rapidjson::Value& params) -> rapidjson::Value
+        {
+            const char* cmd = nullptr;
+            if (params.IsObject())
+            {
+                if (!params.HasMember("command"))
+                {
+                    return rapidjson::Value("method 'execute_command' is missing parameter 'command'");
+                }
+                else if (!params["command"].IsString())
+                {
+                    return rapidjson::Value("method 'execute_command' received invalid type for parameter 'command'");
+                }
+
+                cmd = params["command"].GetString();
+            }
+            else if (params.IsArray())
+            {
+                if (params.Size() < 1)
+                {
+                    return rapidjson::Value("method 'execute_command' received 0 position arguments, 1 required");
+                }
+                else if (!params[0].IsString())
+                {
+                    return rapidjson::Value("method 'execute_command' received invalid type for parameter");
+                }
+
+                cmd = params[0].GetString();
+            }
+            else
+            {
+                assert(0);
+            }
+
+            this->RunCommand(cmd);
+
+            return rapidjson::Value();
+        }
+    );
 }
 
 HMODULE Plugin::GetModuleByName(const char* name)
@@ -180,6 +274,9 @@ void Plugin::StartServer()
 
 void Plugin::RunCommand(const char* cmd)
 {
+    if (!cmd)
+        return;
+
     this->engine_funcs.Cbuf_AddText(this->engine_funcs.Cbuf_GetCurrentPlayer(), cmd, cmd_source_t::kCommandSrcCode);
     this->engine_funcs.Cbuf_Execute();
 }
