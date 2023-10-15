@@ -28,18 +28,25 @@ ServerHandler::ServerHandler(Plugin* plugin):
 
     this->init = true;
 
-    /*
-    @TODO
+    /* execute_squirrel */
     this->register_callback(
-        "list_methods",
-        [=](rapidjson::Value& params) -> rapidjson::Value
+        "methods",
+        [this](rapidjson::MemoryPoolAllocator<>& allocator, rapidjson::Value& params) -> rapidjson::Value
         {
-            rapidjson::MemoryPoolAllocator<>& allocator = this->body.GetAllocator();
+            rapidjson::Value method_list;
+            method_list.SetArray();
 
-            return rapidjson::Value(1);
+            for (auto const& [key, val] : this->methods)
+            {
+                rapidjson::Value method_name;
+                method_name.SetString(key.c_str(), key.size(), allocator);
+
+                method_list.PushBack(method_name, allocator);
+            }
+
+            return method_list;
         }
     );
-    */
 
 }
 
@@ -78,12 +85,19 @@ void ServerHandler::run()
     spdlog::info("Running Handler");
 
     // The engine won't have loaded convar data until after the entry
-    //Sleep(SLEEP_DURATION);
-
-    //int port = this->Convar_Port->GetInt();
-    int port = 26503;
-    RPCServer* server = new RPCServer(INADDR_ANY, port);
+    spdlog::info("Waiting for engine to initialize");
     Sleep(SLEEP_DURATION);
+
+    int port = this->Convar_Port->GetInt();
+    RPCServer* server = new RPCServer(INADDR_ANY, port);
+
+    if (server->get_http_server().get_socket() == -1)
+    {
+        spdlog::error("HTTP Server failed to start");
+        return;
+    }
+
+    spdlog::info("Launched server on port {}", port);
 
     while (this->running)
     {

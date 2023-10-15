@@ -62,7 +62,8 @@ public:
     }
 
     const char* GetString() const {
-        assert(this->ptr);
+        if (!this->ptr)
+            return this->pszDefaultValue;
 
         return this->ptr->m_Value.m_pszString;
     }
@@ -72,13 +73,15 @@ public:
     }
 
     int GetInt() const {
-        assert(this->ptr);
+        if (!this->ptr)
+            return atoi(this->pszDefaultValue);
 
         return this->ptr->m_Value.m_nValue;
     }
 
     float GetFloat() const {
-        assert(this->ptr);
+        if (!this->ptr)
+            return atof(this->pszDefaultValue);
 
         return this->ptr->m_Value.m_fValue;
     }

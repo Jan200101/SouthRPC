@@ -25,11 +25,11 @@ class HTTPRequest {
         HTTPRequest(SOCKET socket);
         ~HTTPRequest();
 
+        std::string get_body() { return this->body; }
+
         void parse_headers(std::string raw);
         void set_body(std::string body) { this->body = body; }
         size_t content_length();
-
-        std::string get_body() { return this->body; }
 
         void respond(std::string status_code, header_map response_headers, std::string response_body);
         void close();
@@ -44,6 +44,8 @@ class HTTPServer {
     public:
         HTTPServer(unsigned long addr, unsigned short port);
         ~HTTPServer();
+
+        SOCKET get_socket() { return this->sock; }
 
         void close();
         HTTPRequest* receive_request();

@@ -34,3 +34,7 @@ plugin_thunderstore(SouthRPC
     "${PROJECT_SOURCE_DIR}/README.md"
     "${PROJECT_SOURCE_DIR}/icon.png"
 )
+
+if (BUILD_LOCAL)
+    add_subdirectory(local)
+endif()

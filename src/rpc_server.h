@@ -40,6 +40,8 @@ class RPCServer {
     public:
         RPCServer(unsigned long addr, unsigned short port);
 
+        HTTPServer& get_http_server() { return this->http_server; }
+
         RPCRequest* receive_request();
 };
 
