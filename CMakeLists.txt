@@ -7,7 +7,7 @@ if(CMAKE_POLICY_DEFAULT_CMP0017 OR CMAKE_POLICY_DEFAULT_CMP0020)
 	# touch these to remove warnings
 endif()
 
-project(SouthRPC VERSION 0.1.0)
+project(SouthRPC VERSION 0.2.0)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING
