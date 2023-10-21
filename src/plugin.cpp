@@ -283,7 +283,7 @@ void Plugin::RunCommand(const char* cmd)
 
     ECommandTarget_t cur_player = this->engine_funcs.Cbuf_GetCurrentPlayer();
     this->engine_funcs.Cbuf_AddText(cur_player, cmd, cmd_source_t::kCommandSrcCode);
-    //this->engine_funcs.Cbuf_Execute(); Crashes?
+    // Don't call Cbuf_Execute, this gets executed somewhere along the way
 }
 
 SQRESULT Plugin::RunSquirrelCode(ScriptContext context, std::string code, SQObject* ret_val)
