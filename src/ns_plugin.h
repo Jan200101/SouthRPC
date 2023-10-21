@@ -73,18 +73,4 @@ typedef ECommandTarget_t (*Cbuf_GetCurrentPlayerType)();
 typedef void (*Cbuf_AddTextType)(ECommandTarget_t eTarget, const char* text, cmd_source_t source);
 typedef void (*Cbuf_ExecuteType)();
 
-// This is a mess
-typedef void (*ConCommandConstructorType)(ConCommand* newCommand, const char* name, FnCommandCallback_t callback, const char* helpString, int flags, void* parent);
-typedef void (*ConVarMallocType)(void* pConVarMaloc, int a2, int a3);
-typedef void (*ConVarRegisterType)(ConVar* pConVar, const char* pszName, const char* pszDefaultValue, int nFlags, const char* pszHelpString, bool bMin, float fMin, bool bMax, float fMax, void* pCallback);
-
-struct EngineData
-{
-    ConCommandConstructorType ConCommandConstructor;
-    ConVarMallocType conVarMalloc;
-    ConVarRegisterType conVarRegister;
-    void* ConVar_Vtable;
-    void* IConVar_Vtable;
-};
-
 #endif

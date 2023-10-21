@@ -74,6 +74,7 @@ RPCRequest::RPCRequest(HTTPRequest* request):
         }
     }
 
+    this->valid = true;
     spdlog::debug("Valid request");
 }
 
@@ -101,7 +102,7 @@ void RPCRequest::response(rapidjson::Value& response)
 
 void RPCRequest::result(rapidjson::Value result)
 {
-    if (!this->body.HasMember("id"))
+    if (this->valid && !this->body.HasMember("id"))
         return;
 
     rapidjson::MemoryPoolAllocator<>& allocator = this->body.GetAllocator();

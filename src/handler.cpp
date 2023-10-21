@@ -1,6 +1,7 @@
 #include <winsock2.h>
 
 #include "handler.h"
+#include "helper.h"
 #include "plugin.h"
 #include "internal/convarproxy.h"
 
@@ -106,18 +107,21 @@ void ServerHandler::run()
     	if (!request)
     		continue;
 
-        std::string method_name = request->get_method();
+        if (request->is_valid())
+        {
+            std::string method_name = request->get_method();
 
-        callback_list::const_iterator method_pos = this->methods.find(method_name);
-        if (method_pos != this->methods.end())
-        {
-            spdlog::info("Invoked method '{}'", method_name);
-            request->result(method_pos->second(request->get_allocator(), request->get_params()));
-        }
-        else
-        {
-            spdlog::error("Attempted to invoke unknown method '{}'", method_name);
-            request->error(rapidjson::Value("Unknown method"));
+            callback_list::const_iterator method_pos = this->methods.find(method_name);
+            if (method_pos != this->methods.end())
+            {
+                spdlog::info("Invoked method '{}'", method_name);
+                request->result(method_pos->second(request->get_allocator(), request->get_params()));
+            }
+            else
+            {
+                spdlog::error("Attempted to invoke unknown method '{}'", method_name);
+                request->error(rapidjson::Value("Unknown method"));
+            }
         }
 
         delete request;

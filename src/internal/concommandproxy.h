@@ -8,7 +8,7 @@
 class ConCommandProxy : public ClassProxy<ConCommand> {
     private:
         const char* name;
-        FnCommandCallback_t callback;
+        PluginFnCommandCallback_t callback;
         const char* helpString;
         int flags;
         void* parent;
@@ -16,7 +16,7 @@ class ConCommandProxy : public ClassProxy<ConCommand> {
     public:
         ConCommandProxy(
             const char* name,
-            FnCommandCallback_t callback,
+            PluginFnCommandCallback_t callback,
             const char* helpString,
             int flags,
             void* parent
@@ -33,7 +33,7 @@ class ConCommandProxy : public ClassProxy<ConCommand> {
             PLUGIN_DATA_TYPES* plugin_data = static_cast<PLUGIN_DATA_TYPES*>(data);
 
             PluginInitFuncs* funcs = plugin_data->funcs;
-            EngineData* engine_data = plugin_data->engine_data;
+            PluginEngineData* engine_data = plugin_data->engine_data;
 
             assert(funcs->createObject);
             assert(engine_data->ConCommandConstructor);
@@ -41,7 +41,7 @@ class ConCommandProxy : public ClassProxy<ConCommand> {
             ptr = static_cast<ConCommand*>(funcs->createObject(ObjectType::CONCOMMANDS));
 
             spdlog::info("Registering ConCommand {}", name);
-            engine_data->ConCommandConstructor(ptr, name, callback, helpString, flags, parent);
+            engine_data->ConCommandConstructor(ptr, const_cast<char*>(name), callback, const_cast<char*>(helpString), flags, parent);
         }
 };
 

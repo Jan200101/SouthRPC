@@ -126,6 +126,7 @@ void Plugin::register_server_callbacks()
                 assert(0);
             }
 
+            spdlog::warn("{}", cmd);
             this->RunCommand(cmd);
 
             return rapidjson::Value();
@@ -157,9 +158,9 @@ HMODULE Plugin::GetModuleByName(const char* name)
     return nullptr;
 }
 
-void Plugin::LoadEngineData(void* data)
+void Plugin::LoadEngineData(PluginEngineData* data, HMODULE dllPtr)
 {
-    this->engine_data = *static_cast<EngineData*>(data);
+    this->engine_data = *data;
 
     PLUGIN_DATA_TYPES plugin_data = {
         &this->funcs,
@@ -176,15 +177,16 @@ void Plugin::LoadEngineData(void* data)
         proxy->initialize(&plugin_data);
     }
 
-    this->engine = GetModuleByName("engine.dll");
+    this->engine = dllPtr;
     if (this->engine)
     {
+        uintptr_t addr = (uintptr_t)this->engine;
+
         // Offsets by Northstar
         // https://github.com/R2Northstar/NorthstarLauncher/blob/0cbdd5672815f956e6b2d2de48d596e87514a07b/NorthstarDLL/engine/r2engine.cpp#L29
-
-        this->engine_funcs.Cbuf_GetCurrentPlayer = reinterpret_cast<Cbuf_GetCurrentPlayerType>(((uintptr_t)this->engine) + 0x120630);
-        this->engine_funcs.Cbuf_AddText = reinterpret_cast<Cbuf_AddTextType>(((uintptr_t)this->engine) + 0x1203B0);
-        this->engine_funcs.Cbuf_Execute = reinterpret_cast<Cbuf_ExecuteType>(((uintptr_t)this->engine) + 0x1204B0);
+        this->engine_funcs.Cbuf_GetCurrentPlayer = reinterpret_cast<Cbuf_GetCurrentPlayerType>(addr + (uintptr_t)0x120630);
+        this->engine_funcs.Cbuf_AddText = reinterpret_cast<Cbuf_AddTextType>(addr + (uintptr_t)0x1203B0);
+        this->engine_funcs.Cbuf_Execute = reinterpret_cast<Cbuf_ExecuteType>(addr + (uintptr_t)0x1204B0);
     }
 }
 
@@ -277,8 +279,11 @@ void Plugin::RunCommand(const char* cmd)
     if (!cmd)
         return;
 
-    this->engine_funcs.Cbuf_AddText(this->engine_funcs.Cbuf_GetCurrentPlayer(), cmd, cmd_source_t::kCommandSrcCode);
-    this->engine_funcs.Cbuf_Execute();
+    spdlog::info("Running command '{}'", cmd);
+
+    ECommandTarget_t cur_player = this->engine_funcs.Cbuf_GetCurrentPlayer();
+    this->engine_funcs.Cbuf_AddText(cur_player, cmd, cmd_source_t::kCommandSrcCode);
+    //this->engine_funcs.Cbuf_Execute(); Crashes?
 }
 
 SQRESULT Plugin::RunSquirrelCode(ScriptContext context, std::string code, SQObject* ret_val)
@@ -351,7 +356,7 @@ SQFuncRegistrationProxy* Plugin::AddNativeSquirrelFunction(std::string returnTyp
     return this->squirrel_functions.emplace_back(sqfrp);
 }
 
-ConCommandProxy* Plugin::ConCommand(const char* name, FnCommandCallback_t callback, const char* helpString, int flags, void* parent)
+ConCommandProxy* Plugin::ConCommand(const char* name, PluginFnCommandCallback_t callback, const char* helpString, int flags, void* parent)
 {
     ConCommandProxy* proxy = new ConCommandProxy(name, callback, helpString, flags, parent);
 

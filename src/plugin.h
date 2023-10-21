@@ -14,7 +14,7 @@ class Plugin {
     private:
         PluginInitFuncs funcs = { 0 };
         PluginNorthstarData data = { 0 };
-        EngineData engine_data = { 0 };
+        PluginEngineData engine_data = { 0 };
 
         SquirrelFunctions client_sqvm_funcs = { 0 };
         SquirrelFunctions server_sqvm_funcs = { 0 };
@@ -45,7 +45,7 @@ class Plugin {
         Plugin(PluginInitFuncs* funcs, PluginNorthstarData* data);
         ~Plugin();
 
-        void LoadEngineData(void* data);
+        void LoadEngineData(PluginEngineData* data, HMODULE dllPtr);
         void LoadSQVMFunctions(ScriptContext context, SquirrelFunctions* funcs);
         void LoadSQVM(ScriptContext context, CSquirrelVM* sqvm);
         void RemoveSQVM(ScriptContext context);
@@ -56,7 +56,7 @@ class Plugin {
         SQFuncRegistrationProxy* AddNativeSquirrelFunction(std::string returnType, std::string name, std::string argTypes, std::string helpText, ScriptContext context, SQFunction func);
 
         // Wraps around the internals we receive
-        ConCommandProxy* ConCommand(const char* name, FnCommandCallback_t callback, const char* helpString, int flags, void* parent = nullptr);
+        ConCommandProxy* ConCommand(const char* name, PluginFnCommandCallback_t callback, const char* helpString, int flags, void* parent = nullptr);
         ConVarProxy* ConVar(const char* pszName, const char* pszDefaultValue, int nFlags, const char* pszHelpString, bool bMin = 0, float fMin = 0, bool bMax = 0, float fMax = 0, FnChangeCallback_t pCallback = nullptr);
 };
 

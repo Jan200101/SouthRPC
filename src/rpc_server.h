@@ -10,6 +10,7 @@
 
 class RPCRequest {
     private:
+        bool valid = false;
         HTTPRequest* request;
 
         rapidjson::Document body;
@@ -23,6 +24,8 @@ class RPCRequest {
     public:
         RPCRequest(HTTPRequest* request);
         ~RPCRequest();
+
+        bool is_valid() { return this->valid; };
 
         rapidjson::MemoryPoolAllocator<>& get_allocator() { return this->body.GetAllocator(); };
         std::string get_method() { return this->method; }

@@ -45,7 +45,7 @@ public:
         PLUGIN_DATA_TYPES* plugin_data = static_cast<PLUGIN_DATA_TYPES*>(data);
 
         PluginInitFuncs* funcs = plugin_data->funcs;
-        EngineData* engine_data = plugin_data->engine_data;
+        PluginEngineData* engine_data = plugin_data->engine_data;
 
         assert(funcs->createObject);
         assert(engine_data->ConCommandConstructor);
@@ -58,7 +58,7 @@ public:
         this->ptr->m_ConCommandBase.s_pConCommandBases = (ConCommandBase*)engine_data->IConVar_Vtable;
 
         engine_data->conVarMalloc(&(this->ptr->m_pMalloc), 0, 0);
-        engine_data->conVarRegister(this->ptr, pszName, pszDefaultValue, nFlags, pszHelpString, bMin, fMin, bMax, fMax, (void*)pCallback);
+        engine_data->conVarRegister(this->ptr, const_cast<char*>(pszName), const_cast<char*>(pszDefaultValue), nFlags, const_cast<char*>(pszHelpString), bMin, fMin, bMax, fMax, (void*)pCallback);
     }
 
     const char* GetString() const {

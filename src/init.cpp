@@ -24,20 +24,13 @@ void PLUGIN_DEINIT()
 }
 
 extern "C" __declspec(dllexport)
-void PLUGIN_INFORM_DLL_LOAD(PluginLoadDLL dll, void* data) {
+void PLUGIN_INFORM_DLL_LOAD(const char* dll, PluginEngineData* data, void* dllPtr) {
     assert(plugin);
 
-    switch (dll) {
-        case PluginLoadDLL::ENGINE:
-            plugin->LoadEngineData(data);
-            plugin->StartServer();
-        case PluginLoadDLL::CLIENT:
-            break;
-        case PluginLoadDLL::SERVER:
-            break;
-        default:
-            spdlog::warn("PLUGIN_INFORM_DLL_LOAD called with unknown type {}", (int)dll);
-            break;
+    if (!strcmp(dll, "engine.dll"))
+    {
+        plugin->LoadEngineData(data, (HMODULE)dllPtr);
+        plugin->StartServer();
     }
 }
 

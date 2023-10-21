@@ -6,7 +6,7 @@
 typedef struct {
     PluginInitFuncs* funcs;
     PluginNorthstarData* data;
-    EngineData* engine_data;
+    PluginEngineData* engine_data;
 } PLUGIN_DATA_TYPES ;
 
 #ifndef SQTrue

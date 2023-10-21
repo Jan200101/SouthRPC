@@ -134,7 +134,7 @@ set(MANIFEST_TEMPLATE "
         \"name\": \"NSPlugin\",
         \"displayname\": \"Northstar Plugin\",
         \"description\": \"\",
-        \"api_version\": \"2\",
+        \"api_version\": \"3\",
         \"version\": \"0\",
         \"run_on_server\": false,
         \"run_on_client\": false
