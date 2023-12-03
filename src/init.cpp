@@ -2,6 +2,7 @@
 #include "internal/logging.h"
 
 #include "plugin.h"
+#include "hook.h"
 
 Plugin* plugin = nullptr;
 
@@ -24,10 +25,15 @@ void PLUGIN_DEINIT()
 }
 
 extern "C" __declspec(dllexport)
-void PLUGIN_INFORM_DLL_LOAD(const char* dll, PluginEngineData* data, void* dllPtr) {
+void PLUGIN_INFORM_DLL_LOAD(const char* dll, PluginEngineData* data, void* dllPtr)
+{
     assert(plugin);
 
-    if (!strcmp(dll, "engine.dll"))
+    if (!strcmp(dll, "client.dll"))
+    {
+        hook_console_print((HMODULE)dllPtr);
+    }
+    else if (!strcmp(dll, "engine.dll"))
     {
         plugin->LoadEngineData(data, (HMODULE)dllPtr);
         plugin->StartServer();

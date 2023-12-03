@@ -17,6 +17,8 @@ add_library(SouthRPC SHARED
     "${CMAKE_CURRENT_SOURCE_DIR}/handler.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/helper.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/helper.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/hook.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/hook.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/http_server.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/http_server.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/rpc_server.cpp"
