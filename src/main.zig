@@ -4,7 +4,7 @@ pub const PLUGIN_NAME = "Zig Plugin";
 pub const LOG_NAME = "ZIGPLUGIN";
 pub const DEPENDENCY_NAME = "ZigPlugin";
 
-pub const std_options = .{
+pub const std_options: std.Options = .{
     .logFn = @import("sys.zig").log,
     .log_level = .info,
 };
